@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/digitorus/pdf"
-	"github.com/digitorus/pdfsign/revocation"
 	"github.com/digitorus/pkcs7"
 	"github.com/digitorus/timestamp"
+	"github.com/fpabl0/pdfsign/revocation"
 	"golang.org/x/crypto/ocsp"
 )
 
