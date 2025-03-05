@@ -9,3 +9,4 @@ certs/*
 *.p12
 *.env
 *.jpg
+example/*
