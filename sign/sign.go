@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
+	"image"
 	"io"
 	"os"
 	"time"
@@ -46,6 +47,7 @@ type SignData struct {
 type Appearance struct {
 	Visible     bool
 	Page        uint32
+	Image       image.Image // added
 	LowerLeftX  float64
 	LowerLeftY  float64
 	UpperRightX float64
@@ -299,9 +301,17 @@ func (context *SignContext) SignPDF() error {
 	}
 
 	// Example usage: passing page number and default rect values
-	visual_signature, err := context.createVisualSignature(visible, context.SignData.Appearance.Page, rectangle)
-	if err != nil {
-		return fmt.Errorf("failed to create visual signature: %w", err)
+	var visual_signature []byte
+	if context.SignData.Appearance.Image != nil {
+		visual_signature, err = context.createVisualSignatureWithImage(visible, context.SignData.Appearance.Page, rectangle)
+		if err != nil {
+			return fmt.Errorf("failed to create visual signature with image: %w", err)
+		}
+	} else {
+		visual_signature, err = context.createVisualSignature(visible, context.SignData.Appearance.Page, rectangle)
+		if err != nil {
+			return fmt.Errorf("failed to create visual signature: %w", err)
+		}
 	}
 
 	// Write the new visual signature object.

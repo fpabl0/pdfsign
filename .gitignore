@@ -6,3 +6,6 @@ testfiles/*_signed.pdf
 testfiles/failed/*
 pdfsign
 certs/*
+*.p12
+*.env
+*.jpg
