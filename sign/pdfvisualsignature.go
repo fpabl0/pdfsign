@@ -80,7 +80,7 @@ func (context *SignContext) createVisualSignature(visible bool, pageNumber uint3
 
 	if found_pages {
 		// Find the page object by its number.
-		page, err := findPageByNumber(root.Key("Pages"), pageNumber)
+		page, err := context.findPageByNumber(pageNumber)
 		if err != nil {
 			return nil, err
 		}
@@ -116,9 +116,8 @@ func (context *SignContext) createVisualSignature(visible bool, pageNumber uint3
 func (context *SignContext) createIncPageUpdate(pageNumber, annot uint32) ([]byte, error) {
 	var page_buffer bytes.Buffer
 
-	// Retrieve the root object from the PDF trailer.
-	root := context.PDFReader.Trailer().Key("Root")
-	page, err := findPageByNumber(root.Key("Pages"), pageNumber)
+	// Retrieve page
+	page, err := context.findPageByNumber(pageNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -154,20 +153,10 @@ func (context *SignContext) createIncPageUpdate(pageNumber, annot uint32) ([]byt
 }
 
 // Helper function to find a page by its number.
-func findPageByNumber(pages pdf.Value, pageNumber uint32) (pdf.Value, error) {
-	if pages.Key("Type").Name() == "Pages" {
-		kids := pages.Key("Kids")
-		for i := 0; i < kids.Len(); i++ {
-			page, err := findPageByNumber(kids.Index(i), pageNumber)
-			if err == nil {
-				return page, nil
-			}
-		}
-	} else if pages.Key("Type").Name() == "Page" {
-		if pageNumber == 1 {
-			return pages, nil
-		}
-		pageNumber--
+func (context *SignContext) findPageByNumber(pageNumber uint32) (pdf.Value, error) {
+	page := context.PDFReader.Page(int(pageNumber))
+	if page.V.IsNull() {
+		return pdf.Value{}, fmt.Errorf("page number %d not found", pageNumber)
 	}
-	return pdf.Value{}, fmt.Errorf("page number %d not found", pageNumber)
+	return page.V, nil
 }

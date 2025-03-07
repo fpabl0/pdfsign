@@ -67,7 +67,7 @@ func (context *SignContext) createVisualSignatureWithImage(visible bool, pageNum
 
 	if found_pages {
 		// Find the page object by its number.
-		page, err := findPageByNumber(root.Key("Pages"), pageNumber)
+		page, err := context.findPageByNumber(pageNumber)
 		if err != nil {
 			return nil, err
 		}
