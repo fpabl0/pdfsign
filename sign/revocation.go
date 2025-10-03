@@ -3,6 +3,7 @@ package sign
 import (
 	"crypto/x509"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -43,7 +44,17 @@ func embedOCSPRevocationStatus(cert, issuer *x509.Certificate, i *revocation.Inf
 // embedCRLRevocationStatus requires an issuer as it needs to implement the
 // the interface, a nil argment might be given if the issuer is not known.
 func embedCRLRevocationStatus(cert, issuer *x509.Certificate, i *revocation.InfoArchival) error {
-	resp, err := http.Get(cert.CRLDistributionPoints[0])
+	httpUrl := ""
+	for _, hurl := range cert.CRLDistributionPoints {
+		if strings.HasPrefix(hurl, "http") {
+			httpUrl = hurl
+			break
+		}
+	}
+	if httpUrl == "" {
+		return errors.New("no http scheme CRLDistributionPoints found")
+	}
+	resp, err := http.Get(httpUrl)
 	if err != nil {
 		return err
 	}
